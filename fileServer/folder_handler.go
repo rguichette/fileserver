@@ -11,6 +11,35 @@ type FolderHandler struct {
 	StorageDir string
 }
 
+func (f *FolderHandler) Readfile(fileName string) (string, error) {
+	fullPath := filepath.Join(f.StorageDir, fileName)
+
+	content, err := os.ReadFile(fullPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read file: %w", err)
+	}
+
+	return string(content), nil
+}
+
+func (f *FolderHandler) ListFiles() ([]string, error) {
+	var files []string
+
+	err := filepath.Walk(f.StorageDir, func(path string, info os.FileInfo, err error) error {
+
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			relPath, _ := filepath.Rel(f.StorageDir, path)
+			files = append(files, relPath)
+		}
+
+		return nil
+	})
+	return files, err
+}
+
 func NewFileHandler(storageDir string) *FolderHandler {
 	err := os.MkdirAll(storageDir, os.ModePerm)
 	if err != nil {
