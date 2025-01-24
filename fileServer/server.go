@@ -49,8 +49,21 @@ func (h *SimpleHandler) Handle(conn net.Conn) {
 		if strings.HasPrefix(line, "LIST") {
 			h.handlerListCommand(conn)
 		} else if strings.HasPrefix(line, "UPLOAD") {
-			currentFile = strings.TrimPrefix(line, "UPLOAD")
+			currentFile = strings.TrimSpace(strings.TrimPrefix(line, "UPLOAD"))
 			fmt.Fprintf(conn, "Ready to receive %s\n ", currentFile)
+		} else if strings.HasPrefix(line, "GET") {
+			fileName := strings.TrimSpace(strings.TrimPrefix(line, "GET"))
+			fmt.Printf("GET command requested file: '%s'\n", fileName) // Debug log
+
+			content, err := h.FolderHandler.Readfile(fileName)
+			if err != nil {
+				fmt.Fprintf(conn, "ERROR: %v\n", err)
+				fmt.Printf("Error reading file: %v\n", err) // Debug log
+			} else {
+				fmt.Fprintln(conn, content)
+				fmt.Printf("File '%s' sent to client\n", fileName) // Debug log
+			}
+
 		} else if currentFile != "" {
 			content := strings.NewReader(line)
 			err := h.FolderHandler.Savefile(currentFile, content)

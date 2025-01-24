@@ -13,6 +13,7 @@ type FolderHandler struct {
 
 func (f *FolderHandler) Readfile(fileName string) (string, error) {
 	fullPath := filepath.Join(f.StorageDir, fileName)
+	fmt.Printf("Trying to read file: %s\n", fullPath)
 
 	content, err := os.ReadFile(fullPath)
 	if err != nil {
